@@ -3,220 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HeatRecover AI | 工业余热精细化测算系统</title>
+    <title>HeatMaster Pro | 工业余热回收综合测算系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f4f7fa; }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .input-card { @apply bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-all duration-300; }
-        .input-card:hover { @apply shadow-md border-blue-200; }
-        input[type="number"] { @apply w-full bg-slate-50 border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none; }
-        label { @apply block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider; }
-        .tab-btn.active { @apply bg-blue-600 text-white shadow-lg shadow-blue-200; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .config-card { @apply bg-white p-6 rounded-3xl shadow-sm border border-slate-100; }
+        .input-group label { @apply block text-[10px] font-bold text-slate-400 uppercase mb-1 px-1; }
+        input, select { @apply w-full bg-slate-50 border-none p-3 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all; }
+        .metric-card { @apply p-6 rounded-3xl text-white shadow-lg; }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="text-slate-900">
 
-    <div class="flex min-h-screen">
-        <aside class="w-20 lg:w-64 bg-slate-900 text-white flex flex-col items-center py-8 px-4 gap-8">
-            <div class="flex items-center gap-3 mb-10">
-                <div class="p-2 bg-blue-600 rounded-lg"><i data-lucide="flame" size="24"></i></div>
-                <span class="hidden lg:block font-extrabold text-xl tracking-tighter">HeatMaster</span>
-            </div>
-            <nav class="flex flex-col gap-4 w-full">
-                <button onclick="switchTab('energy')" class="tab-btn active flex items-center gap-3 p-4 rounded-xl transition w-full">
-                    <i data-lucide="zap"></i> <span class="hidden lg:block">能源基准</span>
-                </button>
-                <button onclick="switchTab('exhaust')" class="tab-btn flex items-center gap-3 p-4 rounded-xl transition w-full">
-                    <i data-lucide="wind"></i> <span class="hidden lg:block">尾气参数</span>
-                </button>
-                <button onclick="switchTab('freshair')" class="tab-btn flex items-center gap-3 p-4 rounded-xl transition w-full">
-                    <i data-lucide="cloud-rain"></i> <span class="hidden lg:block">新风系统</span>
-                </button>
-                <button onclick="switchTab('space')" class="tab-btn flex items-center gap-3 p-4 rounded-xl transition w-full">
-                    <i data-lucide="maximize"></i> <span class="hidden lg:block">空间布局</span>
-                </button>
-            </nav>
-            <div class="mt-auto opacity-40 text-[10px] hidden lg:block text-center italic">Professional Engineering Tools v3.0</div>
-        </aside>
-
-        <main class="flex-1 p-6 lg:p-10 overflow-y-auto">
-            <header class="flex justify-between items-end mb-10">
+    <div class="max-w-[1440px] mx-auto p-4 lg:p-8">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-blue-200 shadow-xl">
+                    <i data-lucide="factory"></i>
+                </div>
                 <div>
-                    <h1 class="text-3xl font-extrabold text-slate-900">项目效益实时分析</h1>
-                    <p class="text-slate-500 mt-1">基于实时工况的能量平衡与ROI模拟</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight">HeatMaster <span class="text-blue-600">Pro</span></h1>
+                    <p class="text-slate-400 text-xs font-medium">工业涂装与烘干余热回收专家系统</p>
                 </div>
-                <button onclick="calculateAll()" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-600 transition-all flex items-center gap-2">
-                    <i data-lucide="play" size="18"></i> 运行全量计算
+            </div>
+            <div class="flex gap-3">
+                <button onclick="window.print()" class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-slate-50">
+                    <i data-lucide="printer" size="16"></i> 导出PDF简报
                 </button>
-            </header>
+                <button onclick="calculateAll()" class="px-8 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+                    开始实时测算
+                </button>
+            </div>
+        </header>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-1 space-y-6">
-                    <div id="panel-energy" class="tab-panel input-card">
-                        <h3 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="coins" class="text-yellow-500"></i> 能源成本单价</h3>
-                        <div class="space-y-4">
-                            <div><label>天然气价格 (元/m³)</label><input type="number" id="pGas" value="3.8"></div>
-                            <div><label>蒸汽价格 (元/吨)</label><input type="number" id="pSteam" value="260"></div>
-                            <div><label>工业电价 (元/kWh)</label><input type="number" id="pElec" value="0.9"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-4 space-y-6 overflow-y-auto max-h-[85vh] pr-2 custom-scrollbar">
+                
+                <section class="config-card">
+                    <h3 class="flex items-center gap-2 font-bold mb-4 text-slate-700"><i data-lucide="coins" size="18" class="text-blue-500"></i> 1. 能源与成本基准</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label>主流加热方式</label>
+                            <select id="mainHeatSource">
+                                <option value="gas">燃气加热</option>
+                                <option value="steam">蒸汽加热</option>
+                                <option value="elec">电加热</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>能源单价 (元)</label>
+                            <input type="number" id="energyPrice" value="3.5">
                         </div>
                     </div>
+                </section>
 
-                    <div id="panel-exhaust" class="tab-panel hidden input-card">
-                        <h3 class="font-bold mb-4 flex items-center gap-2 text-orange-600"><i data-lucide="thermometer-sun"></i> 尾气端数据</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="col-span-2"><label>尾气总量 (Nm³/h)</label><input type="number" id="exFlow" value="25000"></div>
-                            <div><label>排放温度 (℃)</label><input type="number" id="exTemp" value="145"></div>
-                            <div><label>含湿量 (g/kg)</label><input type="number" id="exHum" value="35"></div>
-                            <div class="col-span-2"><label>溶剂浓度 (mg/m³)</label><input type="number" id="exVoc" value="200"></div>
+                <section class="config-card">
+                    <h3 class="flex items-center gap-2 font-bold mb-4 text-orange-600"><i data-lucide="wind" size="18"></i> 2. 尾气端参数 (热源)</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2 input-group">
+                            <label>尾气排放量 (Nm³/h)</label>
+                            <input type="number" id="exFlow" value="20000">
+                        </div>
+                        <div class="input-group">
+                            <label>排放温度 (℃)</label>
+                            <input type="number" id="exTemp" value="130">
+                        </div>
+                        <div class="input-group">
+                            <label>风机运行频率 (Hz)</label>
+                            <input type="number" id="exFanHz" value="45">
+                        </div>
+                        <div class="input-group">
+                            <label>含湿量 (g/kg)</label>
+                            <input type="number" id="exHum" value="25">
+                        </div>
+                        <div class="input-group">
+                            <label>粉尘浓度 (mg/m³)</label>
+                            <input type="number" id="exDust" value="50">
                         </div>
                     </div>
+                </section>
 
-                    <div id="panel-freshair" class="tab-panel hidden input-card">
-                        <h3 class="font-bold mb-4 flex items-center gap-2 text-blue-600"><i data-lucide="fan"></i> 新风与风机参数</h3>
-                        <div class="space-y-4">
-                            <div><label>新风处理量 (Nm³/h)</label><input type="number" id="airFlow" value="22000"></div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label>进风温度 (℃)</label><input type="number" id="airTempIn" value="15"></div>
-                                <div><label>风机频率 (Hz)</label><input type="number" id="fanFreq" value="42"></div>
-                            </div>
+                <section class="config-card">
+                    <h3 class="flex items-center gap-2 font-bold mb-4 text-emerald-600"><i data-lucide="leaf" size="18"></i> 3. 新风端参数 (受热)</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label>新风量 (Nm³/h)</label>
+                            <input type="number" id="airFlow" value="18000">
+                        </div>
+                        <div class="input-group">
+                            <label>进风温度 (℃)</label>
+                            <input type="number" id="airInTemp" value="15">
                         </div>
                     </div>
+                </section>
 
-                    <div id="panel-space" class="tab-panel hidden input-card">
-                        <h3 class="font-bold mb-4 flex items-center gap-2 text-purple-600"><i data-lucide="ruler"></i> 改造空间约束 (m)</h3>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div><label>长</label><input type="number" id="sL" value="5.5"></div>
-                            <div><label>宽</label><input type="number" id="sW" value="2.2"></div>
-                            <div><label>高</label><input type="number" id="sH" value="3.5"></div>
+                <section class="config-card">
+                    <h3 class="flex items-center gap-2 font-bold mb-4 text-purple-600"><i data-lucide="layout" size="18"></i> 4. 改造空间限制 (m)</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="input-group"><label>长</label><input type="number" id="sL" value="4.0"></div>
+                        <div class="input-group"><label>宽</label><input type="number" id="sW" value="2.0"></div>
+                        <div class="input-group"><label>高</label><input type="number" id="sH" value="3.0"></div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="lg:col-span-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="metric-card bg-slate-900">
+                        <span class="text-xs opacity-60 font-bold tracking-widest uppercase">预计年节省</span>
+                        <div class="text-4xl font-black mt-2">¥ <span id="resMoney">0</span> <small class="text-sm">万</small></div>
+                        <div class="mt-4 flex items-center gap-2 text-xs text-emerald-400">
+                            <i data-lucide="trending-up" size="14"></i> 较传统方案提升 24% 能效
                         </div>
+                    </div>
+                    <div class="metric-card bg-blue-600 shadow-blue-200">
+                        <span class="text-xs opacity-80 font-bold tracking-widest uppercase">回收期 (ROI)</span>
+                        <div class="text-4xl font-black mt-2"><span id="resPeriod">0</span> <small class="text-sm">年</small></div>
+                        <div class="mt-4 text-xs opacity-80">静态投资按 80万 预估</div>
+                    </div>
+                    <div class="metric-card bg-emerald-600 shadow-emerald-200">
+                        <span class="text-xs opacity-80 font-bold tracking-widest uppercase">年度碳减排</span>
+                        <div class="text-4xl font-black mt-2"><span id="resCo2">0</span> <small class="text-sm">t/CO2</small></div>
+                        <div class="mt-4 text-xs opacity-80 text-emerald-100 italic">相当于植树约 1200 棵</div>
                     </div>
                 </div>
 
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-white">
-                        <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-3xl shadow-xl shadow-blue-100">
-                            <p class="text-xs opacity-70 uppercase font-bold tracking-widest mb-1">年节省费用</p>
-                            <div class="text-3xl font-black">¥ <span id="resMoney">0</span> <small class="text-sm font-normal">万</small></div>
+                <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">10年期收益预测曲线</h3>
+                            <p class="text-xs text-slate-400">含设备折旧与维护成本测算</p>
                         </div>
-                        <div class="bg-slate-800 p-6 rounded-3xl">
-                            <p class="text-xs opacity-50 uppercase font-bold tracking-widest mb-1">回收期 (ROI)</p>
-                            <div class="text-3xl font-black text-blue-400"><span id="resPeriod">0</span> <small class="text-sm font-normal text-white">年</small></div>
-                        </div>
-                        <div class="bg-emerald-600 p-6 rounded-3xl">
-                            <p class="text-xs opacity-70 uppercase font-bold tracking-widest mb-1">碳减排贡献</p>
-                            <div class="text-3xl font-black"><span id="resCo2">0</span> <small class="text-sm font-normal uppercase">t/y</small></div>
+                        <div class="flex gap-2">
+                            <span class="flex items-center gap-1 text-[10px] font-bold text-slate-400"><span class="w-2 h-2 bg-blue-600 rounded-full"></span> 累计净收益</span>
                         </div>
                     </div>
+                    <div class="h-[350px]">
+                        <canvas id="roiChart"></canvas>
+                    </div>
+                </div>
 
-                    <div class="bg-white p-8 rounded-3xl border border-slate-100">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-lg font-bold">能源替代效益对比 (等效价值)</h3>
-                            <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-full">LIVE PREVIEW</span>
-                        </div>
-                        <div class="h-[300px]">
-                            <canvas id="mainChart"></canvas>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="config-card">
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="shield-check" class="text-blue-500"></i> 工程可行性建议</h4>
+                        <div id="spaceAlert" class="mb-4"></div>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li class="flex justify-between border-b pb-1"><span>预估换热器压降:</span> <span class="font-bold text-slate-900">280 Pa</span></li>
+                            <li class="flex justify-between border-b pb-1"><span>建议片距:</span> <span id="resPitch" class="font-bold text-slate-900">--</span></li>
+                            <li class="flex justify-between border-b pb-1"><span>新风出口温度:</span> <span id="resAirOut" class="font-bold text-blue-600">-- ℃</span></li>
+                        </ul>
                     </div>
-                    
-                    <div id="adviceBox" class="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex gap-4 items-start">
-                        <i data-lucide="info" class="text-blue-600 mt-1"></i>
-                        <div class="text-sm text-blue-900 leading-relaxed" id="resAdvice">
-                            正在分析工况数据...
+                    <div class="config-card">
+                        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="alert-triangle" class="text-orange-500"></i> 运维风险提示</h4>
+                        <div id="riskText" class="text-sm text-slate-500 leading-relaxed">
+                            输入工况参数后自动生成风险评估报告...
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <script>
         lucide.createIcons();
-        let chart = null;
-
-        function switchTab(id) {
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('panel-' + id).classList.remove('hidden');
-            event.currentTarget.classList.add('active');
-        }
+        let roiChart = null;
 
         function calculateAll() {
-            // 获取各参数
+            // 输入获取
             const exFlow = parseFloat(document.getElementById('exFlow').value);
             const exTemp = parseFloat(document.getElementById('exTemp').value);
             const airFlow = parseFloat(document.getElementById('airFlow').value);
-            const airInT = parseFloat(document.getElementById('airTempIn').value);
-            const pGas = parseFloat(document.getElementById('pGas').value);
-            const pElec = parseFloat(document.getElementById('pElec').value);
-            const pSteam = parseFloat(document.getElementById('pSteam').value);
-            
-            // 物理常量与计算逻辑
-            const rho = 1.29; // 空气密度
-            const cp = 1.005; // 空气比热
-            const eff = 0.68; // 工业换热器综合效率
-            
-            // 1. 回收功率计算 (kW)
-            const deltaT = exTemp - 55; // 假设排气降至55℃
-            const powerKW = (exFlow * rho * cp * deltaT * eff) / 3600;
-            const energyGJ_H = powerKW * 3600 / 1000000;
-            
-            // 2. 能源替代量 (每小时)
-            const savedGasH = energyGJ_H / 0.035; // 1m³天然气约为0.035GJ
-            const savedSteamH = energyGJ_H / 2.7; // 1吨低压蒸汽约为2.7GJ
-            const savedElecH = powerKW;
+            const airInT = parseFloat(document.getElementById('airInTemp').value);
+            const price = parseFloat(document.getElementById('energyPrice').value);
+            const heatType = document.getElementById('mainHeatSource').value;
+            const space = document.getElementById('sL').value * document.getElementById('sW').value * document.getElementById('sH').value;
+            const exFanHz = parseFloat(document.getElementById('exFanHz').value);
+            const dust = parseFloat(document.getElementById('exDust').value);
 
-            // 3. 经济计算 (年运行7000h)
-            const hours = 7000;
-            const yearlyMoney = (savedGasH * pGas * hours) / 10000;
-            const investment = 65; // 假设默认投资
-            const co2 = energyGJ_H * hours * 0.075;
+            // 1. 基础物理计算
+            const cp = 1.005, rho = 1.2, eff = 0.72;
+            const qKW = (exFlow * rho * cp * (exTemp - 60) * eff) / 3600; 
+            const qGjYear = (qKW * 3600 / 1000000) * 7200; // 年运行7200h
 
-            // 4. 界面更新
-            document.getElementById('resMoney').innerText = yearlyMoney.toFixed(1);
-            document.getElementById('resPeriod').innerText = (investment / yearlyMoney).toFixed(2);
-            document.getElementById('resCo2').innerText = Math.round(co2);
-
-            // 5. 动态建议逻辑
-            let advice = `根据当前测算，新风温度可从 ${airInT}℃ 提升至约 ${Math.round(airInT + (energyGJ_H*1000000/(airFlow*rho*cp)))}℃。`;
-            if(parseFloat(document.getElementById('fanFreq').value) > 45) {
-                advice += " <br><b>注意：</b>当前风机频率较高，增加换热器压降可能导致风量不足，建议核算风机余压。";
+            // 2. 经济收益 (根据热源不同，效率也不同)
+            let moneyYear = 0;
+            if(heatType === 'gas') {
+                moneyYear = (qGjYear / 0.035 * price) / 10000; // 假设燃气低位发热量0.035GJ/m3
+            } else if(heatType === 'elec') {
+                moneyYear = (qKW * 7200 * price) / 10000;
+            } else {
+                moneyYear = (qGjYear / 2.7 * price) / 10000; // 假设蒸汽热焓2.7GJ/t
             }
-            document.getElementById('resAdvice').innerHTML = advice;
 
-            updateChart(savedGasH * pGas, (powerKW * pElec), (savedSteamH * pSteam));
+            // 3. 结果呈现
+            document.getElementById('resMoney').innerText = moneyYear.toFixed(1);
+            document.getElementById('resPeriod').innerText = (80 / moneyYear).toFixed(1);
+            document.getElementById('resCo2').innerText = Math.round(qGjYear * 0.07);
+            document.getElementById('resAirOut').innerText = Math.round(airInT + (qKW * 3600 / (airFlow * rho * cp)));
+
+            // 4. 空间与风险评估
+            const alertBox = document.getElementById('spaceAlert');
+            if(space < 10) {
+                alertBox.innerHTML = `<div class="p-3 bg-red-50 text-red-600 text-xs rounded-xl border border-red-100 font-bold">⚠️ 空间受限：建议采用板式换热器或定制非标框架。</div>`;
+            } else {
+                alertBox.innerHTML = `<div class="p-3 bg-emerald-50 text-emerald-600 text-xs rounded-xl border border-emerald-100 font-bold">✅ 空间充足：推荐标准化管壳式或管式换热模块。</div>`;
+            }
+
+            let riskMsg = "";
+            if(dust > 100) riskMsg += "• 烟气粉尘较高，必须配置自动吹扫系统。<br>";
+            if(exFanHz > 47) riskMsg += "• 风机频率接近满载，新增压降可能导致生产风量不足。<br>";
+            if(exTemp < 90) riskMsg += "• 排放温度较低，需警惕尾气露点腐蚀风险。";
+            document.getElementById('riskText').innerHTML = riskMsg || "• 当前工况稳定，常规选型即可。";
+            document.getElementById('resPitch').innerText = dust > 80 ? "10-12 mm" : "6-8 mm";
+
+            updateChart(80, moneyYear);
         }
 
-        function updateChart(gas, elec, steam) {
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            if(chart) chart.destroy();
-            chart = new Chart(ctx, {
-                type: 'bar',
+        function updateChart(invest, income) {
+            const ctx = document.getElementById('roiChart').getContext('2d');
+            const years = [0,1,2,3,4,5,6,7,8,9,10];
+            const data = years.map(y => (income * y - invest).toFixed(1));
+
+            if(roiChart) roiChart.destroy();
+            roiChart = new Chart(ctx, {
+                type: 'line',
                 data: {
-                    labels: ['天然气方案', '纯电补偿方案', '蒸汽补偿方案'],
+                    labels: years.map(y => 'Y'+y),
                     datasets: [{
-                        label: '小时节省费用 (元)',
-                        data: [gas.toFixed(1), elec.toFixed(1), steam.toFixed(1)],
-                        backgroundColor: ['#2563eb', '#1e293b', '#10b981'],
-                        borderRadius: 12,
-                        barThickness: 40
+                        data: data,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.05)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 4,
+                        pointRadius: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { drawBorder: false, color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                    scales: {
+                        y: { grid: { borderDash: [5, 5], color: '#e2e8f0' } },
+                        x: { grid: { display: false } }
+                    }
                 }
             });
         }
 
-        window.onload = () => {
-            calculateAll();
-        };
+        window.onload = calculateAll;
     </script>
 </body>
 </html>
