@@ -3,157 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工业余热回收经济效益计算器</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .input-group { @apply mb-4; }
-        label { @apply block text-sm font-medium text-gray-700 mb-1; }
-        input { @apply w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500; }
-    </style>
-</head>
-
-<head>
-    <meta charset="UTF-8">
-    <title>余热回收能效分析云端版</title>
+    <title>SmartHeat | 工业余热回收数字化专家</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .gradient-text { background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .input-focus { transition: all 0.3s; }
+        .input-focus:focus { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div class="max-w-6xl mx-auto py-10 px-4">
-        <div class="bg-white rounded-2xl shadow-xl flex flex-wrap overflow-hidden">
-            <div class="w-full md:w-1/3 p-8 border-r border-gray-100">
-                <h2 class="text-xl font-bold mb-6 text-slate-800">参数配置</h2>
-                </div>
-            
-            <div class="w-full md:w-2/3 p-8 bg-slate-50/50">
-                <h2 class="text-xl font-bold mb-6 text-slate-800">效益分析可视化</h2>
-                <div class="h-64 mb-8">
-                    <canvas id="myChart"></canvas> 
-                </div>
-                </div>
+<body class="text-slate-900">
+
+    <nav class="flex items-center justify-between px-8 py-4 bg-white/50 sticky top-0 z-50 backdrop-blur-md border-b">
+        <div class="flex items-center gap-2">
+            <i data-lucide="zap" class="text-blue-600 fill-blue-600"></i>
+            <span class="text-xl font-bold tracking-tight">SmartHeat <span class="text-blue-600">Pro</span></span>
         </div>
-    </div>
-</body>
-</html>
-<body class="bg-gray-50 p-4 md:p-10">
-    <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden">
-        <header class="bg-blue-600 p-6 text-white text-center">
-            <h1 class="text-2xl font-bold">余热回收项目初步测算工具</h1>
-            <p class="opacity-80 mt-2">快速评估能源节约潜力与经济回收期</p>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-            <section>
-                <h2 class="text-lg font-semibold mb-4 border-b pb-2 text-blue-800">1. 工况参数</h2>
-                <div class="input-group">
-                    <label>流体流量 (kg/h)</label>
-                    <input type="number" id="flowRate" value="10000">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="input-group">
-                        <label>进口温度 (℃)</label>
-                        <input type="number" id="tempIn" value="150">
-                    </div>
-                    <div class="input-group">
-                        <label>出口温度 (℃)</label>
-                        <input type="number" id="tempOut" value="80">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>流体比热容 (kJ/kg·℃)</label>
-                    <input type="number" id="specificHeat" value="4.18" step="0.01">
-                    <span class="text-xs text-gray-400">* 水约4.18，烟气约1.05</span>
-                </div>
-
-                <h2 class="text-lg font-semibold mb-4 border-b pb-2 mt-6 text-blue-800">2. 运营及成本</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="input-group">
-                        <label>年运行时间 (h)</label>
-                        <input type="number" id="hours" value="7200">
-                    </div>
-                    <div class="input-group">
-                        <label>换热效率 (%)</label>
-                        <input type="number" id="efficiency" value="85">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>项目投资总额 (万元)</label>
-                    <input type="number" id="investment" value="50">
-                </div>
-                <div class="input-group">
-                    <label>热力价值单价 (元/GJ)</label>
-                    <input type="number" id="energyPrice" value="60">
-                </div>
-                
-                <button onclick="calculate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">立即计算</button>
-            </section>
-
-            <section class="bg-blue-50 p-6 rounded-lg border border-blue-100">
-                <h2 class="text-lg font-semibold mb-6 text-blue-800">3. 测算结果</h2>
-                
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">小时回收热量:</span>
-                        <span class="text-xl font-bold text-blue-700"><span id="resHeatHour">0</span> GJ/h</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-600">年回收总热量:</span>
-                        <span class="text-xl font-bold text-blue-700"><span id="resHeatYear">0</span> GJ/y</span>
-                    </div>
-                    <hr>
-                    <div class="flex justify-between items-center text-green-700">
-                        <span class="font-medium">年节约标准煤:</span>
-                        <span class="text-xl font-bold"><span id="resCoal">0</span> 吨/年</span>
-                    </div>
-                    <div class="flex justify-between items-center text-green-700">
-                        <span class="font-medium">年经济收益:</span>
-                        <span class="text-xl font-bold">¥ <span id="resMoney">0</span> 万元</span>
-                    </div>
-                    <hr>
-                    <div class="p-4 bg-white rounded-lg border-2 border-orange-400 text-center">
-                        <span class="block text-gray-500 text-sm">预计静态投资回收期</span>
-                        <span class="text-3xl font-black text-orange-500"><span id="resPeriod">0</span> 年</span>
-                    </div>
-                </div>
-            </section>
+        <div class="hidden md:flex gap-6 text-sm font-medium text-slate-500">
+            <a href="#" class="hover:text-blue-600">能效算法</a>
+            <a href="#" class="hover:text-blue-600">碳交易核算</a>
+            <a href="#" class="hover:text-blue-600">关于我们</a>
         </div>
-    </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-10">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-black mb-4 gradient-text">余热回收项目效益测算</h1>
+            <p class="text-slate-500 max-w-2xl mx-auto">输入基础工况参数，实时获取热力平衡数据、经济回收周期及碳减排环境贡献分析。</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glass-card p-6 rounded-3xl shadow-sm">
+                    <div class="flex items-center gap-2 mb-6 text-blue-700 font-semibold">
+                        <i data-lucide="settings-2" size="20"></i> 核心工况参数
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-bold uppercase text-slate-400 mb-1 block">介质流量 (kg/h)</label>
+                            <input type="number" id="flowRate" value="12000" class="w-full bg-slate-50 border-none p-3 rounded-xl input-focus">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold uppercase text-slate-400 mb-1 block">入口温度 (℃)</label>
+                                <input type="number" id="tempIn" value="180" class="w-full bg-slate-50 border-none p-3 rounded-xl input-focus">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold uppercase text-slate-400 mb-1 block">预期出口 (℃)</label>
+                                <input type="number" id="tempOut" value="60" class="w-full bg-slate-50 border-none p-3 rounded-xl input-focus">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold uppercase text-slate-400 mb-1 block">设备投资 (万元)</label>
+                            <input type="number" id="investment" value="80" class="w-full bg-slate-50 border-none p-3 rounded-xl input-focus">
+                        </div>
+                        <div class="pt-4 border-t border-slate-100 mt-4">
+                            <button onclick="updateAll()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="refresh-cw" size="18"></i> 更新测算报告
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-900 rounded-3xl p-6 text-white shadow-xl shadow-emerald-100 relative overflow-hidden">
+                    <i data-lucide="leaf" class="absolute -right-4 -bottom-4 opacity-10 w-32 h-32"></i>
+                    <h3 class="font-bold flex items-center gap-2 mb-4"><i data-lucide="globe" size="18"></i> 碳减排贡献</h3>
+                    <div class="text-3xl font-bold mb-1"><span id="resCO2">0</span> <span class="text-sm font-normal opacity-70">tCO2e/年</span></div>
+                    <p class="text-xs text-emerald-300">相当于每年种植约 <span id="resTrees">0</span> 棵成年树木</p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass-card p-6 rounded-3xl">
+                        <p class="text-sm text-slate-500 mb-1">年回收热量</p>
+                        <div class="text-2xl font-bold text-slate-800"><span id="resGjYear">0</span> <small class="text-xs text-slate-400">GJ</small></div>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-blue-500">
+                        <p class="text-sm text-slate-500 mb-1">年节省费用</p>
+                        <div class="text-2xl font-bold text-blue-600">¥ <span id="resMoney">0</span> <small class="text-xs text-slate-400">万</small></div>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-orange-500">
+                        <p class="text-sm text-slate-500 mb-1">投资回收期</p>
+                        <div class="text-2xl font-bold text-orange-600"><span id="resPeriod">0</span> <small class="text-xs text-slate-400">年</small></div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-800">现金流回正趋势预测</h3>
+                            <p class="text-xs text-slate-400 italic">基于 10 年生命周期动态模拟</p>
+                        </div>
+                    </div>
+                    <div class="w-full h-[350px]">
+                        <canvas id="roiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        function calculate() {
-            // 获取输入值
-            const m = parseFloat(document.getElementById('flowRate').value);
-            const tin = parseFloat(document.getElementById('tempIn').value);
-            const tout = parseFloat(document.getElementById('tempOut').value);
-            const cp = parseFloat(document.getElementById('specificHeat').value);
-            const h = parseFloat(document.getElementById('hours').value);
-            const eff = parseFloat(document.getElementById('efficiency').value) / 100;
+        // 初始化图标
+        lucide.createIcons();
+
+        let myChart = null;
+
+        function updateAll() {
+            // 获取输入
+            const flow = parseFloat(document.getElementById('flowRate').value);
+            const tIn = parseFloat(document.getElementById('tempIn').value);
+            const tOut = parseFloat(document.getElementById('tempOut').value);
             const invest = parseFloat(document.getElementById('investment').value);
-            const price = parseFloat(document.getElementById('energyPrice').value);
-
-            // 1. 计算小时理论放热量 (Q = m * cp * deltaT) 单位：kJ/h
-            const qKjHour = m * cp * (tin - tout);
-            // 2. 实际小时回收热量 (考虑效率，换算为GJ)
-            const qGjHour = (qKjHour * eff) / 1000000;
-            // 3. 年回收热量
-            const qGjYear = qGjHour * h;
-            // 4. 年节煤 (1吨标煤 = 29.3 GJ)
-            const coalYear = qGjYear / 29.3;
-            // 5. 年收益 (万元)
-            const moneyYear = (qGjYear * price) / 10000;
-            // 6. 回收期
+            
+            // 默认参数
+            const cp = 4.18; // 水比热容
+            const hours = 8000; // 年运行时间
+            const eff = 0.85; // 换热效率
+            const gjPrice = 75; // 蒸汽/热力价格 (元/GJ)
+            
+            // 核心计算
+            const qHour = (flow * cp * (tIn - tOut) * eff) / 1000000; // GJ/h
+            const qYear = qHour * hours;
+            const moneyYear = (qYear * gjPrice) / 10000; // 万元/年
             const period = invest / moneyYear;
+            
+            // 碳计算 (1GJ 热量约减排 0.08 吨CO2 - 经验系数)
+            const co2Year = qYear * 0.082;
+            const trees = co2Year * 5; // 粗略估算
 
-            // 更新UI
-            document.getElementById('resHeatHour').innerText = qGjHour.toFixed(2);
-            document.getElementById('resHeatYear').innerText = qGjYear.toFixed(0);
-            document.getElementById('resCoal').innerText = coalYear.toFixed(1);
-            document.getElementById('resMoney').innerText = moneyYear.toFixed(2);
-            document.getElementById('resPeriod').innerText = isFinite(period) ? period.toFixed(1) : "---";
+            // 更新文本
+            document.getElementById('resGjYear').innerText = Math.round(qYear).toLocaleString();
+            document.getElementById('resMoney').innerText = moneyYear.toFixed(1);
+            document.getElementById('resPeriod').innerText = period.toFixed(2);
+            document.getElementById('resCO2').innerText = Math.round(co2Year);
+            document.getElementById('resTrees').innerText = Math.round(trees);
+
+            // 更新图表
+            updateChart(invest, moneyYear);
         }
 
-        // 初始化运行一次
-        calculate();
+        function updateChart(invest, income) {
+            const labels = Array.from({length: 11}, (_, i) => `第${i}年`);
+            const data = labels.map((_, i) => (income * i - invest).toFixed(2));
+
+            if(myChart) myChart.destroy();
+
+            const ctx = document.getElementById('roiChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '净累计收益 (万元)',
+                        data: data,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#2563eb',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { 
+                            grid: { color: '#f1f5f9' },
+                            ticks: { callback: value => value + '万' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        updateAll();
     </script>
 </body>
 </html>
