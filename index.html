@@ -3,106 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HeatMaster | 专项余热回收测算</title>
+    <title>HeatMaster Pro | 工业节能诊断系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap');
-        body { font-family: 'Noto Sans SC', sans-serif; background: #f8fafc; }
-        .option-card { @apply cursor-pointer border-2 border-transparent bg-white p-4 rounded-2xl shadow-sm transition-all hover:border-blue-300; }
-        .option-card.active { @apply border-blue-600 bg-blue-50 shadow-md; }
-        .input-group label { @apply block text-xs font-bold text-slate-400 uppercase mb-1 px-1; }
-        input { @apply w-full bg-white border border-slate-200 p-3 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', "Microsoft YaHei", sans-serif; background: #f1f5f9; }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .input-card { @apply bg-white p-5 rounded-[1.5rem] shadow-sm border border-slate-100 transition-all; }
+        .energy-opt { @apply cursor-pointer border-2 border-slate-100 p-3 rounded-xl text-center transition-all hover:bg-blue-50; }
+        .energy-opt.active { @apply border-blue-600 bg-blue-50 text-blue-600 font-bold; }
+        label { @apply block text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-tight; }
+        input, select { @apply w-full bg-slate-50 border-none p-2.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none; }
+        .expert-mode { @apply bg-slate-100 p-4 rounded-xl border-l-4 border-l-orange-400 mt-4 hidden; }
     </style>
 </head>
 <body class="text-slate-800 pb-10">
 
-    <div class="max-w-6xl mx-auto px-4 pt-10">
-        <div class="text-center mb-10">
-            <h1 class="text-3xl font-black text-slate-900">余热回收项目经济性分析</h1>
-            <p class="text-slate-500 mt-2 text-sm">请选择您现有的加热能源方式，系统将为您生成专项回收曲线</p>
-        </div>
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-black italic tracking-tighter text-slate-900">HEAT<span class="text-blue-600">DIAGNOSIS</span></h1>
+                <p class="text-xs text-slate-400 font-bold uppercase">工业余热回收·专业级 ROI 评估系统</p>
+            </div>
+            <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border">
+                <span class="text-xs font-bold text-slate-500">专家模式</span>
+                <button onclick="toggleExpert()" id="expertBtn" class="w-12 h-6 bg-slate-200 rounded-full relative transition-all">
+                    <div class="w-4 h-4 bg-white rounded-full absolute left-1 top-1 shadow-sm transition-all" id="toggleCircle"></div>
+                </button>
+            </div>
+        </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <div class="lg:col-span-1 space-y-6">
+            <div class="lg:col-span-4 space-y-4 overflow-y-auto max-h-[85vh] pr-2 custom-scrollbar">
                 
-                <div class="space-y-3">
-                    <label class="px-1 text-slate-500 font-bold">Step 1: 选择原有能源方式</label>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div onclick="setEnergy('gas')" id="btn-gas" class="option-card active text-center">
-                            <i data-lucide="flame" class="mx-auto mb-1 text-orange-500"></i>
-                            <span class="text-xs font-bold">天然气</span>
-                        </div>
-                        <div onclick="setEnergy('elec')" id="btn-elec" class="option-card text-center">
-                            <i data-lucide="zap" class="mx-auto mb-1 text-yellow-500"></i>
-                            <span class="text-xs font-bold">电加热</span>
-                        </div>
-                        <div onclick="setEnergy('coal')" id="btn-coal" class="option-card text-center">
-                            <i data-lucide="layers" class="mx-auto mb-1 text-slate-600"></i>
-                            <span class="text-xs font-bold">燃煤</span>
+                <div class="input-card">
+                    <label>Step 1: 当前主要加热能源</label>
+                    <div class="grid grid-cols-3 gap-2 mt-2">
+                        <div onclick="setEnergy('gas')" id="opt-gas" class="energy-opt active text-[11px]">天然气</div>
+                        <div onclick="setEnergy('elec')" id="opt-elec" class="energy-opt text-[11px]">电加热</div>
+                        <div onclick="setEnergy('coal')" id="opt-coal" class="energy-opt text-[11px]">燃煤</div>
+                    </div>
+                </div>
+
+                <div class="input-card">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="col-span-2"><label>项目总投资 (万元)</label><input type="number" id="invest" value="80"></div>
+                        <div class="col-span-2"><label id="unitPriceLabel">天然气价格 (元/m³)</label><input type="number" id="unitPrice" value="3.5"></div>
+                        <div><label>尾气量 (Nm³/h)</label><input type="number" id="exFlow" value="20000"></div>
+                        <div><label>排放温度 (℃)</label><input type="number" id="exTemp" value="140"></div>
+                        <div class="col-span-2"><label>年运行时间 (小时/年)</label><input type="number" id="hours" value="7000"></div>
+                    </div>
+
+                    <div id="expertSection" class="expert-mode space-y-3">
+                        <div class="flex items-center gap-2 mb-2 text-orange-600 font-bold text-xs"><i data-lucide="settings" size="14"></i> 工程修正参数</div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label>设备压降 (Pa)</label><input type="number" id="pDrop" value="350"></div>
+                            <div><label>海拔高度 (m)</label><input type="number" id="altitude" value="0"></div>
+                            <div><label>年度维保费率 (%)</label><input type="number" id="mRate" value="3"></div>
+                            <div><label>能源价格涨幅 (%)</label><input type="number" id="eRise" value="2"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm space-y-4 border border-slate-100">
-                    <div class="input-group">
-                        <label>项目总投资 (万元)</label>
-                        <input type="number" id="invest" value="100">
-                    </div>
-                    <div class="input-group" id="price-container">
-                        <label id="price-label">天然气单价 (元/m³)</label>
-                        <input type="number" id="unitPrice" value="3.5">
-                    </div>
-                    <hr>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="input-group">
-                            <label>尾气风量 (Nm³/h)</label>
-                            <input type="number" id="exFlow" value="25000">
-                        </div>
-                        <div class="input-group">
-                            <label>排放温度 (℃)</label>
-                            <input type="number" id="exTemp" value="150">
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label>年运行时间 (小时)</label>
-                        <input type="number" id="hours" value="7000">
-                    </div>
-                    
-                    <button onclick="calculate()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-blue-600 transition-all">
-                        更新计算模型
-                    </button>
-                </div>
+                <button onclick="calculate()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:scale-[1.02] transition-all">
+                    生成诊断报告
+                </button>
             </div>
 
-            <div class="lg:col-span-2 space-y-6">
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-blue-600 p-8 rounded-[2rem] text-white shadow-xl shadow-blue-100">
-                        <p class="text-xs font-bold opacity-70 uppercase tracking-widest">预计回本周期</p>
-                        <div class="text-5xl font-black mt-2"><span id="resPeriod">0</span> <small class="text-xl">年</small></div>
-                        <p class="text-xs mt-4 bg-blue-500/50 inline-block px-3 py-1 rounded-full" id="resTypeTxt">基于天然气替代方案</p>
+            <div class="lg:col-span-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-slate-900 text-white p-6 rounded-[2rem]">
+                        <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest">年度净省成本</p>
+                        <div class="text-3xl font-black mt-1">¥ <span id="resMoney">0</span> <small class="text-sm">万</small></div>
                     </div>
-                    <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-center">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">年度净收益预测</p>
-                        <div class="text-4xl font-black text-slate-800 mt-2">¥ <span id="resMoney">0</span> <small class="text-lg">万</small></div>
-                        <p class="text-xs text-emerald-500 font-bold mt-2 flex items-center gap-1">
-                            <i data-lucide="arrow-up-right" size="14"></i> 较原始方案大幅降低成本
-                        </p>
+                    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">静态回收期</p>
+                        <div class="text-3xl font-black text-blue-600 mt-1"><span id="resPeriod">0</span> <small class="text-sm">年</small></div>
+                    </div>
+                    <div class="bg-emerald-500 text-white p-6 rounded-[2rem]">
+                        <p class="text-[10px] opacity-80 font-bold uppercase tracking-widest">环境贡献 (CO2)</p>
+                        <div class="text-3xl font-black mt-1"><span id="resCo2">0</span> <small class="text-sm">t/y</small></div>
                     </div>
                 </div>
 
-                <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
-                        <i data-lucide="line-chart" class="text-blue-600"></i> 投资回收与现金流预测曲线
-                    </h3>
-                    <div class="h-[350px]">
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-slate-800">10年期现金流动态回收曲线</h3>
+                        <div id="expertIndicator" class="hidden px-2 py-1 bg-orange-100 text-orange-600 text-[10px] font-black rounded">已启用专家修正</div>
+                    </div>
+                    <div class="h-[380px]">
                         <canvas id="roiChart"></canvas>
                     </div>
                 </div>
 
+                <div id="diagMsg" class="bg-blue-50 border border-blue-100 p-5 rounded-2xl text-xs text-blue-800 leading-relaxed">
+                    输入数据以生成工程诊断建议...
+                </div>
             </div>
         </div>
     </div>
@@ -110,88 +109,118 @@
     <script>
         lucide.createIcons();
         let currentEnergy = 'gas';
+        let isExpert = false;
         let roiChart = null;
 
-        // 切换能源方式
+        function toggleExpert() {
+            isExpert = !isExpert;
+            const section = document.getElementById('expertSection');
+            const circle = document.getElementById('toggleCircle');
+            const btn = document.getElementById('expertBtn');
+            const indicator = document.getElementById('expertIndicator');
+            
+            if(isExpert) {
+                section.classList.remove('hidden');
+                circle.style.left = "28px";
+                btn.classList.replace('bg-slate-200', 'bg-orange-400');
+                indicator.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+                circle.style.left = "4px";
+                btn.classList.replace('bg-orange-400', 'bg-slate-200');
+                indicator.classList.add('hidden');
+            }
+            calculate();
+        }
+
         function setEnergy(type) {
             currentEnergy = type;
-            // UI 反馈
-            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('active'));
-            document.getElementById('btn-' + type).classList.add('active');
-            
-            // 自动调整单价标签和默认值
-            const label = document.getElementById('price-label');
+            document.querySelectorAll('.energy-opt').forEach(el => el.classList.remove('active'));
+            document.getElementById('opt-' + type).classList.add('active');
+            const label = document.getElementById('unitPriceLabel');
             const input = document.getElementById('unitPrice');
-            if(type === 'gas') { label.innerText = "天然气单价 (元/m³)"; input.value = 3.5; }
-            if(type === 'elec') { label.innerText = "工业电费单价 (元/kWh)"; input.value = 0.85; }
-            if(type === 'coal') { label.innerText = "标煤单价 (元/吨)"; input.value = 1100; }
-            
+            if(type === 'gas') { label.innerText = "天然气价格 (元/m³)"; input.value = 3.5; }
+            if(type === 'elec') { label.innerText = "工业电价 (元/kWh)"; input.value = 0.8; }
+            if(type === 'coal') { label.innerText = "标煤价格 (元/吨)"; input.value = 1100; }
             calculate();
         }
 
         function calculate() {
+            // 基础参数获取
             const invest = parseFloat(document.getElementById('invest').value);
             const unitPrice = parseFloat(document.getElementById('unitPrice').value);
             const exFlow = parseFloat(document.getElementById('exFlow').value);
             const exTemp = parseFloat(document.getElementById('exTemp').value);
             const hours = parseFloat(document.getElementById('hours').value);
 
-            // 热量计算 (显热)
-            const rho = 1.2, cp = 1.005, eff = 0.7;
+            // 专家参数获取
+            const pDrop = isExpert ? parseFloat(document.getElementById('pDrop').value) : 300;
+            const altitude = isExpert ? parseFloat(document.getElementById('altitude').value) : 0;
+            const mRate = isExpert ? parseFloat(document.getElementById('mRate').value) : 3;
+            const eRise = isExpert ? parseFloat(document.getElementById('eRise').value) : 0;
+
+            // 物理模型：空气密度随海拔修正
+            const rho = 1.29 * Math.exp(-altitude / 8000); 
+            const cp = 1.005, eff = 0.7;
             const qKjH = exFlow * rho * cp * (exTemp - 60) * eff;
-            const qGjH = qKjH / 1000000;
+            const qGjYear = (qKjH / 1000000) * hours;
 
-            // 收益计算
-            let annualIncome = 0;
-            if(currentEnergy === 'gas') {
-                annualIncome = (qGjH / 0.035 * unitPrice * hours) / 10000;
-                document.getElementById('resTypeTxt').innerText = "基于天然气替代方案";
-            } else if(currentEnergy === 'elec') {
-                annualIncome = (qKjH / 3600 * unitPrice * hours) / 10000;
-                document.getElementById('resTypeTxt').innerText = "基于电加热替代方案";
-            } else {
-                annualIncome = (qGjH / 20 * unitPrice * hours) / 10000;
-                document.getElementById('resTypeTxt').innerText = "基于燃煤替代方案";
-            }
+            // 初始年收益计算
+            let grossSaving = 0;
+            if(currentEnergy === 'gas') grossSaving = (qGjYear / 0.035 * unitPrice) / 10000;
+            if(currentEnergy === 'elec') grossSaving = (qKjH / 3600 * hours * unitPrice) / 10000;
+            if(currentEnergy === 'coal') grossSaving = (qGjYear / 20 * unitPrice) / 10000;
 
-            // 更新文本
-            document.getElementById('resMoney').innerText = annualIncome.toFixed(1);
-            const period = invest / annualIncome;
-            document.getElementById('resPeriod').innerText = period.toFixed(1);
+            // 扣除项计算
+            const extraFanPower = (exFlow / 3600 * pDrop) / (0.65 * 1000); // kW
+            const extraElecCost = (extraFanPower * hours * 0.85) / 10000; // 假设补充电价0.85
+            const maintenanceCost = invest * (mRate / 100);
 
-            updateChart(invest, annualIncome);
+            const netYearSaving = grossSaving - extraElecCost - maintenanceCost;
+
+            // 更新显示
+            document.getElementById('resMoney').innerText = netYearSaving.toFixed(1);
+            document.getElementById('resPeriod').innerText = (invest / netYearSaving).toFixed(1);
+            document.getElementById('resCo2').innerText = Math.round(qGjYear * 0.075);
+
+            // 诊断建议
+            let diag = `诊断报告：当前工况下，新风温度预计可提升约 ${Math.round(qKjH/(exFlow*rho*cp))} ℃。`;
+            if(isExpert && pDrop > 500) diag += `<br>⚠️ 注意：换热器压降过高，需重点校验原风机电机负载。`;
+            if(altitude > 1000) diag += `<br>🏔️ 高海拔修正：已补偿空气密度降低带来的热交换衰减。`;
+            document.getElementById('diagMsg').innerHTML = diag;
+
+            updateChart(invest, netYearSaving, eRise);
         }
 
-        function updateChart(invest, income) {
-            const labels = Array.from({length: 11}, (_, i) => i + '年');
-            const data = labels.map((_, i) => (income * i - invest).toFixed(2));
+        function updateChart(invest, firstYearIncome, rise) {
+            const labels = Array.from({length: 11}, (_, i) => i + 'Y');
+            let data = [-invest];
+            let cumulative = -invest;
+
+            for(let i = 1; i <= 10; i++) {
+                // 考虑能源价格逐年上涨
+                let thisYearIncome = firstYearIncome * Math.pow(1 + rise/100, i-1);
+                cumulative += thisYearIncome;
+                data.push(cumulative.toFixed(2));
+            }
 
             if(roiChart) roiChart.destroy();
             const ctx = document.getElementById('roiChart').getContext('2d');
-            
             roiChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: '累计净损益 (万元)',
                         data: data,
                         borderColor: '#2563eb',
-                        backgroundColor: (context) => {
-                            const chart = context.chart;
-                            const {ctx, chartArea} = chart;
-                            if (!chartArea) return null;
-                            const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                            gradient.addColorStop(0, 'rgba(255, 99, 132, 0.1)'); // 亏损区
-                            gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
-                            gradient.addColorStop(1, 'rgba(37, 99, 235, 0.2)');  // 盈利区
-                            return gradient;
-                        },
+                        backgroundColor: 'rgba(37, 99, 235, 0.05)',
                         fill: true,
                         tension: 0.4,
-                        borderWidth: 4,
-                        pointRadius: 5,
-                        pointBackgroundColor: '#2563eb'
+                        borderWidth: 5,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#2563eb',
+                        pointBorderWidth: 2
                     }]
                 },
                 options: {
@@ -200,7 +229,7 @@
                     plugins: { legend: { display: false } },
                     scales: {
                         y: { 
-                            grid: { color: '#f1f5f9' },
+                            grid: { borderDash: [5, 5] },
                             ticks: { callback: v => v + '万' }
                         },
                         x: { grid: { display: false } }
